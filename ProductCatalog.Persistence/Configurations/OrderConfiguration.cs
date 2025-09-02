@@ -1,12 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using ProductCatalog.Dormain;
+
 
 namespace ProductCatalog.Persistence.Configurations
 {
-    internal class OrderConfiguration
+    public class OrderConfiguration : IEntityTypeConfiguration<Order>
     {
+        public void Configure(EntityTypeBuilder<Order> builder)
+        {
+            builder.Property(x => x.UserId)
+             .IsRequired();
+
+            builder.Property(x => x.TotalAmount)
+                .IsRequired();
+
+            builder.Property(x => x.OrderDate)
+               .IsRequired();
+
+        }
     }
 }

@@ -3,10 +3,15 @@ using ProductCatalog.Dormain;
 
 namespace ProductCatalog.Persistence
 {
-    public class ProductCatalogDbContext:DbContext
+    public class ProductCatalogDbContext:AuditTableDbContext
     {
-        public ProductCatalogDbContext(DbContextOptions options) : base(options)
+        public ProductCatalogDbContext(DbContextOptions<ProductCatalogDbContext> options) : base(options)
         {
+        }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.ApplyConfigurationsFromAssembly(typeof(ProductCatalogDbContext).Assembly);
         }
 
         public DbSet<Product> Products { get; set; }
