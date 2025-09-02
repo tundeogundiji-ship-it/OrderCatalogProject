@@ -8,5 +8,7 @@ namespace ProductCatalog.Dormain
         public decimal TotalAmount {  get; set; }
         public DateTime OrderDate { get; set; }
         public User? User { get; set; }
+
+        public ICollection<OrderItem>? OrderItems { get; set; }
     }
 }

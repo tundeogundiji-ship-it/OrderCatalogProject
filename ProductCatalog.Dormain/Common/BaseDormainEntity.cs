@@ -8,6 +8,7 @@ namespace ProductCatalog.Dormain.Common
         public Guid Id { get; set; }
         public bool IsActive { get; set; } = true;
         public DateTime DateCreated { get; set; }
-        public string CreatedBy { get; set; } = string.Empty;
+        public string? CreatedBy { get; set; }
+        public string? UpdatedBy {  get; set; }
     }
 }
