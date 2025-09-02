@@ -1,4 +1,4 @@
-﻿using ProductCatalog.Application.Authentication;
+﻿using ProductCatalog.Application.Contracts.Authentication;
 using System.Security.Cryptography;
 
 

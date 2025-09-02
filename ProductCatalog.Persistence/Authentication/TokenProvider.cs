@@ -3,7 +3,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
-using ProductCatalog.Application.Authentication;
+using ProductCatalog.Application.Contracts.Authentication;
 using ProductCatalog.Dormain;
 using System.Security.Claims;
 using System.Text;
@@ -29,7 +29,8 @@ namespace ProductCatalog.Persistence.Authentication
                 Subject = new ClaimsIdentity(
                 [
                     new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-                new Claim(JwtRegisteredClaimNames.Email, user.Email!)
+                    new Claim(JwtRegisteredClaimNames.Email, user.Email!),
+                    new Claim(JwtRegisteredClaimNames.Name,user.FirstName+" "+user.LastName)
                 ]),
                 Expires = DateTime.UtcNow.AddMinutes(_configuration.GetValue<int>("Jwt:ExpirationInMinutes")),
                 SigningCredentials = credentials,

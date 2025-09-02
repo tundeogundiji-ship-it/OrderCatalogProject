@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ProductCatalog.Application.Authentication
+namespace ProductCatalog.Application.Contracts.Authentication
 {
     public interface ITokenProvider
     {
