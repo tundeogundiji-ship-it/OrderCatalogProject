@@ -7,6 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Contracts\NewFolder\**" />
+    <EmbeddedResource Remove="Contracts\NewFolder\**" />
+    <None Remove="Contracts\NewFolder\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\ProductCatalog.Dormain\ProductCatalog.Dormain.csproj" />
   </ItemGroup>
 

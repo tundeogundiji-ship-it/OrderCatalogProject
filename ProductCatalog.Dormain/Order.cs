@@ -10,5 +10,7 @@ namespace ProductCatalog.Dormain
         public User? User { get; set; }
 
         public ICollection<OrderItem>? OrderItems { get; set; }
+
+      
     }
 }
