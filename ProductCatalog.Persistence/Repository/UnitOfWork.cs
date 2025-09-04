@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+using ProductCatalog.Application.Constants;
 using ProductCatalog.Application.Contracts.Repository;
 
 namespace ProductCatalog.Persistence.Repository
