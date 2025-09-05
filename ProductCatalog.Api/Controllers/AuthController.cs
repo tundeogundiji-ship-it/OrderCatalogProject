@@ -1,5 +1,5 @@
-﻿using MediatR;
-using Microsoft.AspNetCore.Http;
+﻿using Asp.Versioning;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using ProductCatalog.Application.Dtos.Authentication;
 using ProductCatalog.Application.Features.Accounts.Requests.Commands;
@@ -7,7 +7,8 @@ using ProductCatalog.Application.Responses;
 
 namespace ProductCatalog.Api.Controllers
 {
-    [Route("api/accounts")]
+    [ApiVersion(1)]
+    [Route("api/v{v:apiVersion}/accounts")]
     [ApiController]
     public class AuthController : ControllerBase
     {
@@ -17,6 +18,7 @@ namespace ProductCatalog.Api.Controllers
             _mediator = mediator;
         }
 
+        [MapToApiVersion(1)]
         [Route("Register")]
         public async Task<ActionResult<CustomResult<Guid>>> Create([FromBody] RegisterUserDto request)
         {
