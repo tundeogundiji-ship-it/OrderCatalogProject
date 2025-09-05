@@ -1,6 +1,5 @@
 ﻿using FluentValidation;
 using ProductCatalog.Application.Contracts.Repository;
-using ProductCatalog.Application.Dtos.Products;
 using ProductCatalog.Dormain;
 
 
@@ -25,7 +24,7 @@ namespace ProductCatalog.Application.Dtos.Orders.Validators
                .NotNull();
 
             RuleFor(e => e)
-                .MustAsync(IsProductExist).WithMessage("ProductId does not exist");
+                .MustAsync(IsProductExist).WithMessage("ProductId does not exist or product does not have stock");
         }
 
         public IUnitOfWork _unitOfWork;
@@ -34,7 +33,7 @@ namespace ProductCatalog.Application.Dtos.Orders.Validators
         {
             bool IsExist = false;
             Product? product = await _unitOfWork.productRepository.GetProduct(e.ProductId);
-            if (product is not null)
+            if (product is not null && product.StockQuantity>0)
             {
                 IsExist = true;
             }

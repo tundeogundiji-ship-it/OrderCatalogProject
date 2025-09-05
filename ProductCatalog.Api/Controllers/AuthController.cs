@@ -8,7 +8,7 @@ using ProductCatalog.Application.Responses;
 namespace ProductCatalog.Api.Controllers
 {
     [ApiVersion(1)]
-    [Route("api/v{v:apiVersion}/accounts")]
+    [Route("api/v{v:apiVersion}/Auth")]
     [ApiController]
     public class AuthController : ControllerBase
     {
@@ -19,11 +19,28 @@ namespace ProductCatalog.Api.Controllers
         }
 
         [MapToApiVersion(1)]
-        [Route("Register")]
+        [HttpPost("Register")]
         public async Task<ActionResult<CustomResult<Guid>>> Create([FromBody] RegisterUserDto request)
         {
 
             var command = new RegisterCommands() { RegisterUser = request };
+            var response = await _mediator.Send(command);
+
+            if (!response.IsSuccess)
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
+        }
+
+
+        [MapToApiVersion(1)]
+        [HttpPost("Login")]
+        public async Task<ActionResult<CustomResult<Guid>>> login([FromBody] LoginDto request)
+        {
+
+            var command = new LoginCommands() { payload = request };
             var response = await _mediator.Send(command);
 
             if (!response.IsSuccess)

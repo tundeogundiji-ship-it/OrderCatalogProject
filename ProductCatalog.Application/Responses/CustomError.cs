@@ -7,11 +7,15 @@ namespace ProductCatalog.Application.Responses
         private static readonly string _validationErrorCode = "ValidationErrror";
         private static readonly string _loginFailedErrorCode = "LoginFailed";
         private static readonly string _registerFailedErrorCode = "RegistrationFailed";
+        private static readonly string _orderFailed = "OrderFailed";
+
       
 
 
 
         public static CustomError None = new(string.Empty, string.Empty);
+
+        public static CustomError OrderFailed(string message) => new CustomError(_orderFailed, message);
 
         public static CustomError RegisterFailed(string message) => new CustomError(_registerFailedErrorCode, message);
 

@@ -1,10 +1,12 @@
 ﻿using AutoMapper;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using ProductCatalog.Application.Constants;
 using ProductCatalog.Application.Contracts.Authentication;
 using ProductCatalog.Application.Contracts.Repository;
 using ProductCatalog.Application.Dtos.Authentication.Validators;
 using ProductCatalog.Application.Features.Accounts.Requests.Commands;
+using ProductCatalog.Application.Models;
 using ProductCatalog.Application.Responses;
 using ProductCatalog.Dormain;
 using System.Text;
@@ -12,8 +14,9 @@ using System.Text;
 
 namespace ProductCatalog.Application.Features.Accounts.Handlers.Commands
 {
-    public class RegisterCommandHandler : IRequestHandler<RegisterCommands, CustomResult<Guid>>
+    public class RegisterCommandHandler : IRequestHandler<RegisterCommands, CustomResult<RegisterUserResponse>>
     {
+
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly ILogger<RegisterCommandHandler> _logger;
@@ -27,8 +30,9 @@ namespace ProductCatalog.Application.Features.Accounts.Handlers.Commands
             _passwordHasher = passwordHasher;
         }
 
-        public async Task<CustomResult<Guid>> Handle(RegisterCommands request, CancellationToken cancellationToken)
+        public async Task<CustomResult<RegisterUserResponse>> Handle(RegisterCommands request, CancellationToken cancellationToken)
         {
+            var response = new RegisterUserResponse();
             StringBuilder error = new StringBuilder();
 
             //validation of request
@@ -45,7 +49,7 @@ namespace ProductCatalog.Application.Features.Accounts.Handlers.Commands
 
                 _logger.LogError("Validation error with message {@message}", error.ToString());
 
-                return CustomResult<Guid>.Failure(CustomError.ValidationError(error.ToString()));
+                return CustomResult<RegisterUserResponse>.Failure(CustomError.ValidationError(error.ToString()));
             }
 
             //map record from the dto to user entity
@@ -53,8 +57,11 @@ namespace ProductCatalog.Application.Features.Accounts.Handlers.Commands
             user.PasswordHash = _passwordHasher.Hash(request.RegisterUser!.Password!);
 
             var userEntity = await _unitOfWork.authRepository.Add(user);
+            await _unitOfWork.SaveChanges();
 
-            return CustomResult<Guid>.Success(userEntity.Id);
+            response.message = ResponseMessageConstant.RegisterUserSuccessMessage;
+
+            return CustomResult<RegisterUserResponse>.Success(response);
 
         }
     }

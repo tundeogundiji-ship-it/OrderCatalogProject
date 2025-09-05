@@ -1,5 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using ProductCatalog.Application.Constants;
 using ProductCatalog.Application.Contracts.Repository;
+using ProductCatalog.Application.Models;
 using ProductCatalog.Dormain;
 using System;
 using System.Collections.Generic;
@@ -17,24 +19,28 @@ namespace ProductCatalog.Persistence.Repository
             _dbContext = dbContext;
         }
 
-        public async Task<(List<OrderItem>,string message)> CreateOrder(Order order)
+        public async Task<OrderResponse> CreateOrder(Order order)
         {
+            OrderResponse response = new();
+            StringBuilder error = new StringBuilder();
             using var transaction = await _dbContext.Database.BeginTransactionAsync();
 
-            // first remove orderItem that is out of stock
-            var orderItems = await FilterOrderItem(order);
+            // first remove orderItem that quantity is more than what we have in stock 
+            var orderResult = await OutOfStockProduct(order);
 
-            if (orderItems.itemB.Count > 0)
+            if (orderResult.Item1.Count > 0)
             {
                 await transaction.RollbackAsync();
 
-                return (orderItems.itemB,"Items out of stock");
+                response.message = orderResult.Item2.ToString();
+
+                return response;
             }
 
             //create order
             var orderEntity = await _dbContext.Orders.AddAsync(order);
 
-            foreach (var item in orderItems.itemA)
+            foreach (var item in order.OrderItems!)
             {
                 //deduct product
                 await _dbContext.Products.Where(x => x.Id == item.ProductId)
@@ -44,42 +50,43 @@ namespace ProductCatalog.Persistence.Repository
                 item.OrderId = orderEntity.Entity.Id;
             }
 
-            await _dbContext.OrderItems.AddRangeAsync(orderItems.itemA);
+            await _dbContext.OrderItems.AddRangeAsync(order.OrderItems);
 
             await _dbContext.SaveChangesAsync();
             await transaction.CommitAsync();
 
-            return (orderItems.itemA.ToList(),"successful processed");
+            response.message = ResponseMessageConstant.SuccessfulOrderMessage;
+            response.orderId = orderEntity.Entity.Id;
+
+            return response;
 
         }
 
-        public async Task<(List<OrderItem> itemA,List<OrderItem> itemB)> FilterOrderItem(Order order)
+        public async Task<(List<OrderItem>,string)> OutOfStockProduct(Order order)
         {
-            // first remove orderItem that is out of stock
-            var orderItems = new List<OrderItem>();
+            StringBuilder error = new StringBuilder();
             var outOfStockItems = new List<OrderItem>();
 
             foreach (var item in order.OrderItems!)
             {
                 Product? product = await _dbContext.Products.FirstOrDefaultAsync(x => x.Id == item.Id);
-                if (product!.StockQuantity >= item.Quantity)
+                if (item.Quantity>product!.StockQuantity)
                 {
-                    orderItems.Add(item);
+                    error.Append($"Product Id {item.Id} has  quantity greater than what we have in the stock");
+                    outOfStockItems.Add(item);
                 }
-
-                outOfStockItems.Add(item);
             }
 
-            return (orderItems, outOfStockItems);
+            return (outOfStockItems,error.ToString());
 
         }
 
-        public IEnumerable<Order> GetAllOrder()
+        public async Task<IEnumerable<Order>> GetAllOrder()
         {
-            var orders =  _dbContext.Orders.Include(x => x.User!)
+            var orders = await _dbContext.Orders.Include(x => x.User!)
                              .Include(y => y.OrderItems!)
                              .ThenInclude(q => q.Product)
-                             .AsEnumerable();
+                             .ToListAsync();
 
             return orders!;
         }

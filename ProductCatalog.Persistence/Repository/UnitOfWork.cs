@@ -30,6 +30,11 @@ namespace ProductCatalog.Persistence.Repository
             GC.SuppressFinalize(this);
         }
 
+        public async Task SaveChanges()
+        {
+            await _context.SaveChangesAsync();
+        }
+
         public async Task Save()
         {
             var username = _httpContextAccessor.HttpContext!.User.FindFirst(CustomClaimTypes.Uid)?.Value;

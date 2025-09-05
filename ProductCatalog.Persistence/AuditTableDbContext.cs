@@ -10,6 +10,13 @@ namespace ProductCatalog.Persistence
         {
         }
 
+        public virtual async Task<int> SaveChangesAsync()
+        {
+            var result = await base.SaveChangesAsync();
+
+            return result;
+        }
+
         public virtual async Task<int> SaveChangesAsync(string username)
         {
             foreach (var entry in base.ChangeTracker.Entries<BaseDormainEntity>()
