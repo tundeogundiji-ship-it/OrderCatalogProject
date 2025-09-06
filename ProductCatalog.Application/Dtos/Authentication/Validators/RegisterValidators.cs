@@ -47,7 +47,7 @@ namespace ProductCatalog.Application.Dtos.Authentication.Validators
         {
             bool isExist = false;
             isExist =  await _unitOfWork.authRepository.IsUserExist(e.Email!);
-            return isExist;
+            return !isExist;
         }
 
         public static bool ContainOnlyAlphabet(string input)

@@ -28,7 +28,7 @@ namespace ProductCatalog.Persistence.Repository
             // first remove orderItem that quantity is more than what we have in stock 
             var orderResult = await OutOfStockProduct(order);
 
-            if (orderResult.Item1.Count > 0)
+            if (!string.IsNullOrWhiteSpace(orderResult.Item2))
             {
                 await transaction.RollbackAsync();
 
@@ -37,19 +37,25 @@ namespace ProductCatalog.Persistence.Repository
                 return response;
             }
 
+            List<Product> products = new();
             //create order
+            order.TotalAmount = orderResult.Item1;
             var orderEntity = await _dbContext.Orders.AddAsync(order);
 
             foreach (var item in order.OrderItems!)
             {
                 //deduct product
-                await _dbContext.Products.Where(x => x.Id == item.ProductId)
-                    .ExecuteUpdateAsync(x => x.SetProperty(c => c.StockQuantity, c => c.StockQuantity - item.Quantity!));
+                var product = await _dbContext.Products.FirstOrDefaultAsync(x => x.Id == item.ProductId);
+                product!.StockQuantity -= item.Quantity!; 
 
+                products.Add(product);
+                
                 //create  order item
                 item.OrderId = orderEntity.Entity.Id;
+                item.UnitPrice = product.Price;
             }
 
+            _dbContext.Products.UpdateRange(products);
             await _dbContext.OrderItems.AddRangeAsync(order.OrderItems);
 
             await _dbContext.SaveChangesAsync();
@@ -62,30 +68,36 @@ namespace ProductCatalog.Persistence.Repository
 
         }
 
-        public async Task<(List<OrderItem>,string)> OutOfStockProduct(Order order)
+        public async Task<(decimal,string)> OutOfStockProduct(Order order)
         {
             StringBuilder error = new StringBuilder();
             var outOfStockItems = new List<OrderItem>();
-
+            decimal TotalAmount = 0M;
             foreach (var item in order.OrderItems!)
             {
-                Product? product = await _dbContext.Products.FirstOrDefaultAsync(x => x.Id == item.Id);
+                Product? product = await _dbContext.Products.FirstOrDefaultAsync(x => x.Id == item.ProductId);
                 if (item.Quantity>product!.StockQuantity)
                 {
-                    error.Append($"Product Id {item.Id} has  quantity greater than what we have in the stock");
+                    error.Append($"Product Id {item.ProductId} has  quantity greater than what we have in the stock");
                     outOfStockItems.Add(item);
+                }
+                else
+                {
+                    TotalAmount += (product.Price* item.Quantity);
                 }
             }
 
-            return (outOfStockItems,error.ToString());
+            return (TotalAmount,error.ToString());
 
         }
 
-        public async Task<IEnumerable<Order>> GetAllOrder()
+       
+
+        public async Task<IEnumerable<Order>> GetAllOrder(Guid userId)
         {
-            var orders = await _dbContext.Orders.Include(x => x.User!)
+            var orders = await _dbContext.Orders
                              .Include(y => y.OrderItems!)
-                             .ThenInclude(q => q.Product)
+                             .Where(x=>x.UserId==userId)
                              .ToListAsync();
 
             return orders!;

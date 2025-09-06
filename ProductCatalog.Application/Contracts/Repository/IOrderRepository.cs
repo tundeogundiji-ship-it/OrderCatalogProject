@@ -6,7 +6,7 @@ namespace ProductCatalog.Application.Contracts.Repository
     public interface IOrderRepository:IGenericRepository<Order>
     {
         Task<OrderResponse> CreateOrder(Order order);
-        Task<(List<OrderItem>, string)> OutOfStockProduct(Order order);
-        Task<IEnumerable<Order>> GetAllOrder();
+        Task<(decimal, string)> OutOfStockProduct(Order order);
+        Task<IEnumerable<Order>> GetAllOrder(Guid userId);
     }
 }

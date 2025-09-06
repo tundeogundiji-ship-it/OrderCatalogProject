@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
+using ProductCatalog.Application.Constants;
 using ProductCatalog.Application.Contracts.Authentication;
 using ProductCatalog.Dormain;
 using System.Security.Claims;
@@ -17,7 +18,7 @@ namespace ProductCatalog.Persistence.Authentication
         }
         public string GenerateJwtToken(User user)
         {
-            string secretKey = _configuration["Jwt:Secret"]!;
+            string secretKey = _configuration["JwtSettings:Key"]!;
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
 
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
@@ -30,10 +31,10 @@ namespace ProductCatalog.Persistence.Authentication
                     new Claim(JwtRegisteredClaimNames.Email, user.Email!),
                     new Claim(JwtRegisteredClaimNames.Name,user.FirstName+" "+user.LastName)
                 ]),
-                Expires = DateTime.UtcNow.AddMinutes(_configuration.GetValue<int>("Jwt:ExpirationInMinutes")),
+                Expires = DateTime.UtcNow.AddMinutes(Convert.ToDouble(_configuration["JwtSettings:DurationInMinutes"])),
                 SigningCredentials = credentials,
-                Issuer = _configuration["Jwt:Issuer"],
-                Audience = _configuration["Jwt:Audience"]
+                Issuer = _configuration["JwtSettings:Issuer"],
+                Audience = _configuration["JwtSettings:Audience"]
             };
 
             var handler = new JsonWebTokenHandler();

@@ -19,10 +19,6 @@ namespace ProductCatalog.Application.Dtos.Orders.Validators
                .GreaterThan(0).WithMessage("{PropertyName} is not valid")
                .NotNull();
 
-            RuleFor(x => x.UnitPrice)
-               .NotEmpty().WithMessage("{PropertyName} is required")
-               .NotNull();
-
             RuleFor(e => e)
                 .MustAsync(IsProductExist).WithMessage("ProductId does not exist or product does not have stock");
         }

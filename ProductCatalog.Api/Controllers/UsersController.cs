@@ -1,5 +1,6 @@
 ﻿using Asp.Versioning;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ProductCatalog.Application.Dtos.Authentication;
@@ -13,6 +14,8 @@ namespace ProductCatalog.Api.Controllers
     [ApiVersion(1)]
     [Route("api/v{v:apiVersion}/Users")]
     [ApiController]
+    [Authorize]
+
     public class UsersController : ControllerBase
     {
         private IMediator _mediator;
@@ -21,22 +24,19 @@ namespace ProductCatalog.Api.Controllers
             _mediator = mediator;
         }
 
-        [MapToApiVersion(1)]
-        [HttpGet]
-        public async Task<ActionResult<CustomResult<IEnumerable<GetUsersDto>>>> Get()
-        {
-            var users = await _mediator.Send(new GetUserRequestList());
-            return Ok(users);
-        }
+        //[MapToApiVersion(1)]
+        //[HttpGet]
+        //public async Task<ActionResult<CustomResult<IEnumerable<GetUsersDto>>>> Get()
+        //{
+        //    var users = await _mediator.Send(new GetUserRequestList());
+        //    return Ok(users);
+        //}
 
         [MapToApiVersion(1)]
-        [HttpGet("{Id}")]
-        public async Task<ActionResult<CustomResult<GetProductDto>>> Get(Guid Id)
+        [HttpGet("")]
+        public async Task<ActionResult<CustomResult<GetProductDto>>> Get()
         {
-            var user = await _mediator.Send(new GetUserDetailRequest()
-            {
-                userId = Id
-            });
+            var user = await _mediator.Send(new GetUserDetailRequest());
             return Ok(user);
         }
 

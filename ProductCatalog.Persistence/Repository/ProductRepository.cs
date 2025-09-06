@@ -15,14 +15,14 @@ namespace ProductCatalog.Persistence.Repository
 
         public async Task<Product?> GetProduct(Guid productId)
         {
-            Product? product = await _dbContext.Products.FirstOrDefaultAsync(x => x.Id == productId);
+            Product? product = await _dbContext.Products.FirstOrDefaultAsync(x => x.Id == productId && x.IsActive);
             return product;
         }
 
         public async Task<IEnumerable<Product>> GetProducts()
         {
             IEnumerable<Product> products = Enumerable.Empty<Product>();
-            products = await _dbContext.Products.ToListAsync();
+            products = await _dbContext.Products.Where(x=>x.IsActive).ToListAsync();
 
             return products;
         }
@@ -30,7 +30,7 @@ namespace ProductCatalog.Persistence.Repository
         public async Task<bool> IsProductExist(string name)
         {
             bool IsAvailable = false;
-            IsAvailable = await _dbContext.Products.AnyAsync(x => x.Name!.ToLower() == name.ToLower());
+            IsAvailable = await _dbContext.Products.AnyAsync(x => x.Name!.ToLower() == name.ToLower() && x.IsActive);
 
             return IsAvailable;
         }

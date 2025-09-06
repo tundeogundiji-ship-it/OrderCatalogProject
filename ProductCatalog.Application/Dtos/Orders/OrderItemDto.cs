@@ -9,6 +9,7 @@ namespace ProductCatalog.Application.Dtos.Orders
         public Guid OrderId { get; set; }
         public Guid ProductId { get; set; }
         public int Quantity { get; set; }
+        [JsonIgnore]
         public decimal UnitPrice { get; set; }
     }
 }

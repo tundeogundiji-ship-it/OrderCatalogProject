@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using ProductCatalog.Application.Constants;
+﻿using ProductCatalog.Application.Contracts.Authentication;
 using ProductCatalog.Application.Contracts.Repository;
 
 namespace ProductCatalog.Persistence.Repository
@@ -10,12 +9,12 @@ namespace ProductCatalog.Persistence.Repository
         private IProductRepository? _productRepository;
         private IOrderRepository? _orderRepository;
         private IAuthRepository? _authRepository;
-        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IUserContext userContext;
 
-        public UnitOfWork(ProductCatalogDbContext context,IHttpContextAccessor httpContextAccessor)
+        public UnitOfWork(ProductCatalogDbContext context,IUserContext userContext)
         {
             _context = context;
-            _httpContextAccessor = httpContextAccessor;
+            this.userContext = userContext;
         }
 
         public IProductRepository productRepository => _productRepository ??= new ProductRepository(_context);
@@ -37,7 +36,7 @@ namespace ProductCatalog.Persistence.Repository
 
         public async Task Save()
         {
-            var username = _httpContextAccessor.HttpContext!.User.FindFirst(CustomClaimTypes.Uid)?.Value;
+            var username = userContext.GetUserName();
             await _context.SaveChangesAsync(username!);
         }
     }

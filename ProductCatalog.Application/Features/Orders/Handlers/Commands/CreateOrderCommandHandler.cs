@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using ProductCatalog.Application.Constants;
+using ProductCatalog.Application.Contracts.Authentication;
 using ProductCatalog.Application.Contracts.Repository;
 using ProductCatalog.Application.Dtos.Orders.Validators;
 using ProductCatalog.Application.Features.Orders.Requests.Commands;
@@ -20,21 +21,22 @@ namespace ProductCatalog.Application.Features.Orders.Handlers.Commands
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly ILogger<CreateOrderCommandHandler> logger;
-        private readonly IHttpContextAccessor httpContextAccessor;
+        private readonly IUserContext userContext;
         public CreateOrderCommandHandler(IUnitOfWork unitOfWork, IMapper mapper,
-            ILogger<CreateOrderCommandHandler> logger,IHttpContextAccessor httpContextAccessor)
+            ILogger<CreateOrderCommandHandler> logger,IUserContext userContext)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             this.logger = logger;
-            this.httpContextAccessor = httpContextAccessor;
+            this.userContext = userContext;
         }
         
         
         public async Task<CustomResult<OrderResponse>> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
         {
             var response = new OrderResponse();
-            string? userId = httpContextAccessor.HttpContext!.User.FindFirst(CustomClaimTypes.Uid)?.Value;
+            string username = userContext.GetUserName();
+            Guid userId = userContext.GetUserId();
             //validation request
             logger.LogInformation("Create Order request is {@request}", JsonConvert.SerializeObject(request));
 
@@ -58,11 +60,10 @@ namespace ProductCatalog.Application.Features.Orders.Handlers.Commands
             //map input
             Order? orderRequest = _mapper.Map<Order>(request.CreateOrderDto!);
             orderRequest.DateCreated = DateTime.Now;
-            orderRequest.CreatedBy = userId;
+            orderRequest.CreatedBy = username;
             orderRequest.OrderDate = DateTime.Now;
-            orderRequest.UserId = Guid.Parse(userId!);
-            orderRequest.TotalAmount = request.CreateOrderDto!.OrderItems!.Sum(x=>x.UnitPrice);
-
+            orderRequest.UserId = userId;
+            
             //add order
             response = await _unitOfWork.orderRepository.CreateOrder(orderRequest);
 

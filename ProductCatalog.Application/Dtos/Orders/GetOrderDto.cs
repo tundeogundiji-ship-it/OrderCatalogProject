@@ -8,7 +8,8 @@ namespace ProductCatalog.Application.Dtos.Orders
         public Guid UserId { get; set; }
         public decimal TotalAmount { get; set; }
         public DateTime OrderDate { get; set; }
-        public User? User { get; set; }
+        public string? CreatedBy { get; set; }
+       
 
         public ICollection<GetOrderItemDto>? OrderItems { get; set; }
     }

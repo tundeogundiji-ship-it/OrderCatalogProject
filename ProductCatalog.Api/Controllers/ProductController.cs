@@ -33,7 +33,7 @@ namespace ProductCatalog.Api.Controllers
 
         [MapToApiVersion(1)]
         [HttpGet("{productId}", Name = "GetProduct")]
-        public async Task<ActionResult<CustomResult<GetProductDto>>> Get(Guid productId)
+        public async Task<ActionResult<CustomResult<GetProductDto>>> GetProduct(Guid productId)
         {
             var product = await _mediator.Send(new GetSingleProductRequest()
             {
@@ -53,11 +53,9 @@ namespace ProductCatalog.Api.Controllers
             {
                 return BadRequest(response);
             }
-            return CreatedAtRoute("GetProduct",
-                new
-                {
-                    productId = response.Value.productId
-                });
+
+            return CreatedAtAction(nameof(GetProduct), new { productId = response.Value.productId }, response.Value.productId);
+            
         }
 
         [MapToApiVersion(1)]

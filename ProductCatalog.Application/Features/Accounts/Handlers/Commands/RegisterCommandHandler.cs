@@ -55,6 +55,7 @@ namespace ProductCatalog.Application.Features.Accounts.Handlers.Commands
             //map record from the dto to user entity
             User user = _mapper.Map<User>(request.RegisterUser);
             user.PasswordHash = _passwordHasher.Hash(request.RegisterUser!.Password!);
+            user.DateCreated = DateTime.Now;
 
             var userEntity = await _unitOfWork.authRepository.Add(user);
             await _unitOfWork.SaveChanges();

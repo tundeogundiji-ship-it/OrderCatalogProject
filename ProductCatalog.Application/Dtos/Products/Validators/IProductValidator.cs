@@ -11,7 +11,7 @@ namespace ProductCatalog.Application.Dtos.Products.Validators
             RuleFor(x => x.Name)
                .NotEmpty().WithMessage("{PropertyName} is required")
                .MaximumLength(50).WithMessage("{PropertyName} must not exceed 50 character of length")
-               .Must(ContainOnlyAlphabet).WithMessage("{PropertyName} can not contain digit or special characters")
+               .Must(ContainOnlyAlphabetAndSpace).WithMessage("{PropertyName} can not contain digit or special characters")
                .NotNull();
 
             RuleFor(x => x.Description)
@@ -28,9 +28,9 @@ namespace ProductCatalog.Application.Dtos.Products.Validators
                .NotNull();
         }
 
-        public static bool ContainOnlyAlphabet(string input)
+        public static bool ContainOnlyAlphabetAndSpace(string input)
         {
-            return Regex.IsMatch(input, "^[a-zA-Z]+$");
+            return Regex.IsMatch(input, "^[a-zA-Z ]*$");
         }
     }
 }
